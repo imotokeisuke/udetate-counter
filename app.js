@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load local settings
     const defaultMembers = ['井本', '藤原', '脇山'];
     let members = JSON.parse(localStorage.getItem('pushupMembers')) || defaultMembers;
-    let firebaseUrl = localStorage.getItem('firebaseUrl') || '';
+    let firebaseUrl = localStorage.getItem('firebaseUrl') || 'https://push-up-record-default-rtdb.asia-southeast1.firebasedatabase.app/';
 
     // Firebase refs
     let app = null;
