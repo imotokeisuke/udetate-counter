@@ -1,48 +1,87 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Push-up Tracker</title>
+    <title>Push-up Tracker Multiplayer</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-
 <body>
     <div class="app-container">
         <header>
-            <h1><i class="fa-solid fa-dumbbell"></i> Push-up Tracker</h1>
-            <p class="subtitle">毎日の努力を可視化しよう</p>
+            <div class="header-left">
+                <h1><i class="fa-solid fa-dumbbell"></i> Push-up Tracker</h1>
+                <p class="subtitle">みんなの努力を可視化しよう！</p>
+            </div>
+            <button id="btn-settings" class="btn-icon" title="設定を開く"><i class="fa-solid fa-gear"></i></button>
         </header>
 
+        <div id="connection-status" class="status-badge disconnected"><i class="fa-solid fa-wifi"></i> 未接続</div>
+
         <main>
+            <!-- Settings Modal -->
+            <div id="settings-modal" class="modal hidden">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>⚙️ 設定</h2>
+                        <button id="btn-close-settings" class="btn-icon"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <div class="form-group">
+                        <label for="firebase-url">Firebase Database URL</label>
+                        <input type="url" id="firebase-url" placeholder="https://your-project.firebaseio.com">
+                        <p class="help-text">Realtime Database のURLを入力してください。</p>
+                    </div>
+                    <div class="form-group">
+                        <label>メンバー設定</label>
+                        <div id="members-list-edit" class="members-edit">
+                            <!-- JS will populate -->
+                        </div>
+                        <div class="add-member-wrapper">
+                            <input type="text" id="new-member-name" placeholder="新しい名前">
+                            <button id="btn-add-member" class="btn-secondary">追加</button>
+                        </div>
+                    </div>
+                    <button id="btn-save-settings" class="btn-primary">保存して接続</button>
+                </div>
+            </div>
+
             <section class="dashboard">
-                <div class="stat-card">
-                    <h3>今月の合計</h3>
-                    <div class="stat-value"><span id="monthly-total">0</span> <span class="unit">回</span></div>
+                <div class="stat-card ranking-card">
+                    <h3 id="ranking-title">今月のランキング</h3>
+                    <div id="ranking-list" class="ranking-list">
+                        <!-- Rankings populated by JS -->
+                    </div>
                 </div>
             </section>
 
             <section class="input-section">
                 <h2>記録を追加</h2>
                 <form id="pushup-form">
-                    <div class="form-group">
-                        <label for="date-input">日付</label>
-                        <input type="date" id="date-input" required>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="user-select">記録する人</label>
+                            <select id="user-select" required>
+                                <!-- JS will populate -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="date-input">日付</label>
+                            <input type="date" id="date-input" required>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="count-input">回数</label>
                         <input type="number" id="count-input" min="1" max="1000" placeholder="0" required>
                     </div>
-                    <button type="submit" class="btn-primary">記録する <i class="fa-solid fa-plus"></i></button>
+                    <button type="submit" class="btn-primary" id="btn-submit">記録する <i class="fa-solid fa-plus"></i></button>
                 </form>
             </section>
 
             <section class="history-section">
                 <div class="history-header">
-                    <h2>記録履歴</h2>
+                    <h2>みんなの記録</h2>
                     <select id="month-filter">
                         <!-- Options will be populated by JS -->
                     </select>
@@ -54,7 +93,6 @@
         </main>
     </div>
 
-    <script src="app.js"></script>
+    <script type="module" src="app.js"></script>
 </body>
-
 </html>
