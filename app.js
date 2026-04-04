@@ -161,9 +161,10 @@
         }
     }
 
-    async function addRecord(type, user, date, count) {
+    async function addRecord(type, user, date, count, memo) {
         if (!pushupsRef) return;
         const newRecord = { type, user, date, count, timestamp: firebase.database.ServerValue.TIMESTAMP };
+        if (memo) newRecord.memo = memo;
         try { await pushupsRef.push(newRecord); showSubmitFeedback(type); } catch (e) { alert('失敗'); }
     }
 
@@ -212,9 +213,11 @@
             const date = document.getElementById(`date-input-${type}`).value;
             const countVal = document.getElementById(`count-input-${type}`).value;
             const count = type === 'strength' ? parseInt(countVal, 10) : parseFloat(countVal);
+            const memo = document.getElementById(`memo-input-${type}`).value.trim();
             if (!user || !date || isNaN(count) || count <= 0) { alert('正しく入力してください'); return; }
-            addRecord(type, user, date, count);
+            addRecord(type, user, date, count, memo);
             document.getElementById(`count-input-${type}`).value = '';
+            document.getElementById(`memo-input-${type}`).value = '';
         });
     });
 
@@ -287,10 +290,12 @@
         if (filteredRecords.length === 0) { container.innerHTML = `<div class="empty-state"><p>記録がありません</p></div>`; return; }
         container.innerHTML = filteredRecords.map(r => {
             const color = userColors[members.indexOf(r.user)%userColors.length || 0];
+            const memoHtml = r.memo ? `<div class="history-memo"><i class="fa-solid fa-note-sticky"></i> ${r.memo}</div>` : '';
             return `<div class="history-item">
                 <div class="history-info">
                     <div class="history-info-top"><span class="user-badge" style="background-color: ${color}">${r.user}</span><div class="history-date">${r.date.replace(/-/g, '/')}</div></div>
                     <div class="history-count">${(type==='strength'?r.count:r.count.toFixed(1))} <span>${(type==='strength'?'回':'km')}</span></div>
+                    ${memoHtml}
                 </div>
                 <button class="btn-delete" onclick="window.confirmDelete('${r.id}')"><i class="fa-solid fa-trash"></i></button>
             </div>`;

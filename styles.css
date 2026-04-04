@@ -753,6 +753,48 @@ select:focus {
     min-width: 0;
 }
 
+/* --- Memo Field --- */
+.memo-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-family: 'Inter', sans-serif;
+    resize: vertical;
+    transition: all 0.3s ease;
+    line-height: 1.5;
+}
+
+.memo-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+.history-memo {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin-top: 0.35rem;
+    padding: 0.3rem 0.6rem;
+    background: var(--bg-color);
+    border-radius: 0.4rem;
+    border-left: 3px solid var(--primary-color);
+    line-height: 1.4;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+}
+
+.history-memo i {
+    color: var(--primary-color);
+    font-size: 0.7rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
 @media (max-width: 480px) {
     .history-item { flex-direction: column; align-items: flex-start; gap: 1rem; }
     .btn-delete { align-self: flex-end; }
