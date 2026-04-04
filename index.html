@@ -7,18 +7,40 @@
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase SDK (Compat Version for better file:// protocol support) -->
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-database-compat.js"></script>
 </head>
 <body>
     <div class="app-container">
         <header>
             <div class="header-left">
-                <h1><i class="fa-solid fa-dumbbell"></i> Push-up Tracker</h1>
+                <h1 id="app-title"><i class="fa-solid fa-dumbbell"></i> Fitness Tracker</h1>
                 <p class="subtitle">みんなの努力を可視化しよう！</p>
             </div>
             <button id="btn-settings" class="btn-icon" title="設定を開く"><i class="fa-solid fa-gear"></i></button>
         </header>
 
         <div id="connection-status" class="status-badge disconnected"><i class="fa-solid fa-wifi"></i> 未接続</div>
+
+        <nav class="tab-nav">
+            <button class="nav-item active" data-view="view-strength">
+                <i class="fa-solid fa-dumbbell"></i>
+                <span>筋トレ</span>
+            </button>
+            <button class="nav-item" data-view="view-running">
+                <i class="fa-solid fa-person-running"></i>
+                <span>ランニング</span>
+            </button>
+            <button class="nav-item" data-view="view-calendar">
+                <i class="fa-solid fa-calendar-days"></i>
+                <span>カレンダー</span>
+            </button>
+            <button class="nav-item" data-view="view-goals">
+                <i class="fa-solid fa-bullseye"></i>
+                <span>目標</span>
+            </button>
+        </nav>
 
         <main>
             <!-- Settings Modal -->
@@ -47,52 +69,156 @@
                 </div>
             </div>
 
-            <section class="dashboard">
-                <div class="stat-card ranking-card">
-                    <h3 id="ranking-title">今月のランキング</h3>
-                    <div id="ranking-list" class="ranking-list">
-                        <!-- Rankings populated by JS -->
+            <!-- Strength View -->
+            <section id="view-strength" class="app-view active">
+                <div class="dashboard">
+                    <div class="stat-card ranking-card">
+                        <h3 id="ranking-title-strength">筋トレ今月のランキング</h3>
+                        <div id="ranking-list-strength" class="ranking-list">
+                            <!-- Rankings populated by JS -->
+                        </div>
                     </div>
+                    <div id="goal-status-strength"></div>
+                </div>
+
+                <section class="input-section">
+                    <h2>筋トレ記録を追加</h2>
+                    <form id="record-form-strength" class="record-form" data-type="strength">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="user-select-strength">記録する人</label>
+                                <select id="user-select-strength" class="user-select" required>
+                                    <!-- JS will populate -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="date-input-strength">日付</label>
+                                <input type="date" id="date-input-strength" class="date-input" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="count-input-strength">回数</label>
+                            <input type="number" id="count-input-strength" class="count-input" min="1" max="1000" placeholder="0" required>
+                        </div>
+                        <button type="submit" class="btn-primary btn-submit">記録する <i class="fa-solid fa-plus"></i></button>
+                    </form>
+                </section>
+
+                <section class="history-section">
+                    <div class="history-header">
+                        <h2>筋トレの記録</h2>
+                        <select class="month-filter" id="month-filter-strength">
+                            <!-- Options will be populated by JS -->
+                        </select>
+                    </div>
+                    <div class="history-list" id="history-list-strength">
+                        <!-- History items will be inserted here -->
+                    </div>
+                </section>
+            </section>
+
+            <!-- Running View -->
+            <section id="view-running" class="app-view">
+                <div class="dashboard">
+                    <div class="stat-card ranking-card">
+                        <h3 id="ranking-title-running">ランニング今月のランキング</h3>
+                        <div id="ranking-list-running" class="ranking-list">
+                            <!-- Rankings populated by JS -->
+                        </div>
+                    </div>
+                    <div id="goal-status-running"></div>
+                </div>
+
+                <section class="input-section">
+                    <h2>ランニング記録を追加</h2>
+                    <form id="record-form-running" class="record-form" data-type="running">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="user-select-running">記録する人</label>
+                                <select id="user-select-running" class="user-select" required>
+                                    <!-- JS will populate -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="date-input-running">日付</label>
+                                <input type="date" id="date-input-running" class="date-input" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="count-input-running">距離 (km)</label>
+                            <input type="number" id="count-input-running" class="count-input" min="0.1" step="0.1" max="100" placeholder="0.0" required>
+                        </div>
+                        <button type="submit" class="btn-primary btn-submit">記録する <i class="fa-solid fa-plus"></i></button>
+                    </form>
+                </section>
+
+                <section class="history-section">
+                    <div class="history-header">
+                        <h2>ランニングの記録</h2>
+                        <select class="month-filter" id="month-filter-running">
+                            <!-- Options will be populated by JS -->
+                        </select>
+                    </div>
+                    <div class="history-list" id="history-list-running">
+                        <!-- History items will be inserted here -->
+                    </div>
+                </section>
+            </section>
+
+            <!-- Calendar View -->
+            <section id="view-calendar" class="app-view">
+                <div class="calendar-container glass-card">
+                    <div class="calendar-header">
+                        <button id="btn-prev-month" class="btn-icon"><i class="fa-solid fa-chevron-left"></i></button>
+                        <h2 id="calendar-month-year">2026年4月</h2>
+                        <button id="btn-next-month" class="btn-icon"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                    <div class="calendar-grid-header">
+                        <span>日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span>
+                    </div>
+                    <div id="calendar-grid" class="calendar-grid"></div>
+                </div>
+                <div id="day-details" class="day-details hidden">
+                    <h3 id="details-date">2026/04/04</h3>
+                    <div id="details-list" class="details-list"></div>
                 </div>
             </section>
 
-            <section class="input-section">
-                <h2>記録を追加</h2>
-                <form id="pushup-form">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="user-select">記録する人</label>
-                            <select id="user-select" required>
-                                <!-- JS will populate -->
-                            </select>
+            <!-- Goals View -->
+            <section id="view-goals" class="app-view">
+                <div class="stat-card goals-setting-card">
+                    <h2 id="goals-title">個人の目標設定</h2>
+                    <div class="goals-form">
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>ユーザーを選択</label>
+                            <select id="user-select-goal" class="user-select"></select>
                         </div>
                         <div class="form-group">
-                            <label for="date-input">日付</label>
-                            <input type="date" id="date-input" required>
+                            <label>筋トレ目標 (回)</label>
+                            <input type="number" id="goal-strength" placeholder="現在の目標: なし">
                         </div>
+                        <div class="form-group">
+                            <label>ランニング目標 (km)</label>
+                            <input type="number" id="goal-running" step="0.1" placeholder="現在の目標: なし">
+                        </div>
+                        <button id="btn-save-goals" class="btn-primary">目標を保存</button>
                     </div>
-                    <div class="form-group">
-                        <label for="count-input">回数</label>
-                        <input type="number" id="count-input" min="1" max="1000" placeholder="0" required>
-                    </div>
-                    <button type="submit" class="btn-primary" id="btn-submit">記録する <i class="fa-solid fa-plus"></i></button>
-                </form>
-            </section>
-
-            <section class="history-section">
-                <div class="history-header">
-                    <h2>みんなの記録</h2>
-                    <select id="month-filter">
-                        <!-- Options will be populated by JS -->
-                    </select>
                 </div>
-                <div class="history-list" id="history-list">
-                    <!-- History items will be inserted here -->
+
+                <div class="charts-container">
+                    <div class="stat-card chart-card">
+                        <h3>筋トレ実績 vs 目標</h3>
+                        <div id="chart-strength" class="goal-chart"></div>
+                    </div>
+                    <div class="stat-card chart-card">
+                        <h3>ランニング実績 vs 目標</h3>
+                        <div id="chart-running" class="goal-chart"></div>
+                    </div>
                 </div>
             </section>
         </main>
     </div>
 
-    <script type="module" src="app.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
