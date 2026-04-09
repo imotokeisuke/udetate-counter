@@ -42,8 +42,6 @@
     const goalInputStrength = document.getElementById('goal-strength');
     const goalInputRunning = document.getElementById('goal-running');
     const btnSaveGoals = document.getElementById('btn-save-goals');
-    const chartStrength = document.getElementById('chart-strength');
-    const chartRunning = document.getElementById('chart-running');
 
     // --- State ---
     let records = []; 
@@ -340,13 +338,16 @@
                     }
                 });
 
-                userTypePairs.forEach(p => {
+                userTypePairs.slice(0, 4).forEach(p => {
                     const color = userColors[members.indexOf(p.user) % userColors.length || 0];
                     const icon = p.type === 'strength' ? 'dumbbell' : 'person-running';
                     mk.innerHTML += `<div class="marker" style="background-color: ${color}">
                         <i class="fa-solid fa-${icon}"></i>
                     </div>`;
                 });
+                if (userTypePairs.length > 4) {
+                    mk.innerHTML += `<div class="marker-more" style="font-size: 8px; color: var(--text-secondary); align-self: center;">+</div>`;
+                }
 
                 el.appendChild(mk);
                 el.addEventListener('click', () => {
@@ -378,29 +379,8 @@
         const ts = ur.filter(r => r.type === 'strength').reduce((s, r) => s + r.count, 0);
         const tr = ur.filter(r => r.type === 'running').reduce((s, r) => s + r.count, 0);
 
-        renderGoalChart('strength', ts, currentGoal.strength);
-        renderGoalChart('running', tr, currentGoal.running);
     }
 
-    function renderGoalChart(type, act, tgt) {
-        const container = type === 'strength' ? chartStrength : chartRunning;
-        const max = Math.max(act, tgt || 0, 1) * 1.5; // 余裕を持たせる（1.5倍）
-        const ap = Math.max((act / max) * 100, 4); // 最低4%の高さ
-        const tp = tgt ? (tgt / max) * 100 : 0;
-        const displayVal = type === 'strength' ? act : act.toFixed(1);
-        container.innerHTML = `
-            <div class="chart-bar-container">
-                <div class="chart-bar ${type}" style="height: ${ap}%">
-                    <span class="chart-value">${displayVal}</span>
-                </div>
-                <span class="chart-label">実績</span>
-            </div>
-            ${tgt ? `
-                <div class="goal-line" style="bottom: calc(${tp}% + 36px)">
-                    <span class="goal-line-label">${tgt}${(type==='strength'?'回':'km')}</span>
-                </div>` : ''}
-        `;
-    }
 
     function renderGoalStatus(type) {
         const container = document.getElementById(`goal-status-${type}`);

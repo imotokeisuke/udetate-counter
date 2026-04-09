@@ -546,99 +546,6 @@ select:focus {
     font-size: 0.875rem;
 }
 
-/* --- Goals & Charts --- */
-.chart-card {
-    text-align: left;
-}
-
-.goal-chart {
-    height: 120px;
-    position: relative;
-    display: flex;
-    align-items: flex-end;
-    gap: 10%;
-    padding: 0 10%;
-    margin-top: 2rem;
-}
-
-.chart-bar-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    height: 100%;
-    justify-content: flex-end;
-    position: relative;
-}
-
-.chart-bar {
-    width: 100%;
-    border-radius: 8px 8px 0 0;
-    transition: height 0.3s ease;
-    min-height: 4px;
-    position: relative;
-    overflow: visible;
-}
-
-.chart-bar.strength {
-    background: linear-gradient(180deg, var(--primary-color), var(--primary-hover));
-}
-
-.chart-bar.running {
-    background: linear-gradient(180deg, var(--success-color), var(--success-color-dark));
-}
-
-.chart-value {
-    position: absolute;
-    top: -24px;
-    left: 50%;
-    transform: translateX(-50%);
-    white-space: nowrap;
-    font-size: 0.8rem;
-    font-weight: 800;
-    color: var(--text-primary);
-    pointer-events: none;
-}
-
-.goal-line {
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background-color: var(--danger-color);
-    border-top: 1px dashed rgba(239, 68, 68, 0.5);
-    z-index: 10;
-    display: flex;
-    align-items: center;
-}
-
-.goal-line-label {
-    position: absolute;
-    left: -10px;
-    top: -22px;
-    font-size: 10px;
-    font-weight: 800;
-    color: var(--danger-color);
-    background: var(--card-bg);
-    padding: 2px 6px;
-    border: 1px solid var(--danger-color);
-    border-radius: 4px;
-    white-space: nowrap;
-}
-
-.goal-line::after {
-    content: 'GOAL';
-    position: absolute;
-    right: -40px;
-    top: -8px;
-    font-size: 9px;
-    font-weight: 800;
-    color: var(--danger-color);
-    background: var(--card-bg);
-    padding: 2px 4px;
-    border: 1px solid var(--danger-color);
-    border-radius: 4px;
-}
 
 /* --- Goal Status Card --- */
 .goal-status-card {
@@ -741,17 +648,6 @@ select:focus {
     to { opacity: 1; transform: translateX(0); }
 }
 
-/* --- Charts Container (Side by Side) --- */
-.charts-container {
-    display: flex;
-    gap: 1rem;
-    align-items: flex-end;
-}
-
-.charts-container .chart-card {
-    flex: 1;
-    min-width: 0;
-}
 
 /* --- Memo Field --- */
 .memo-input {
@@ -800,6 +696,39 @@ select:focus {
     .btn-delete { align-self: flex-end; }
     .form-row { flex-direction: column; gap: 0; }
     .goals-form { grid-template-columns: 1fr; }
-    .goal-line::after { right: 0; top: -15px; }
-    .charts-container { flex-direction: column; }
+}
+/* --- Calendar Fixing (Mobile) --- */
+@media (max-width: 480px) {
+    .calendar-container {
+        padding: 0.75rem;
+    }
+    
+    .calendar-day {
+        aspect-ratio: 1 / 1;
+        min-height: 0;
+        padding: 2px;
+        justify-content: flex-start;
+    }
+
+    .calendar-day span {
+        font-size: 0.7rem;
+        margin-bottom: 2px;
+    }
+
+    .day-marker-container {
+        gap: 2px;
+        margin-top: 0;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .marker {
+        width: 8px;
+        height: 8px;
+        font-size: 0;
+    }
+
+    .marker i {
+        display: none;
+    }
 }
