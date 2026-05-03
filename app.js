@@ -39,6 +39,7 @@
 
     // Goals elements
     const userSelectGoal = document.getElementById('user-select-goal');
+    const monthSelectGoal = document.getElementById('month-select-goal');
     const goalInputStrength = document.getElementById('goal-strength');
     const goalInputRunning = document.getElementById('goal-running');
     const btnSaveGoals = document.getElementById('btn-save-goals');
@@ -86,6 +87,7 @@
         setupCalendarNav();
         
         userSelectGoal.addEventListener('change', renderGoalsView);
+        if (monthSelectGoal) monthSelectGoal.addEventListener('change', renderGoalsView);
         document.getElementById('user-select-strength').addEventListener('change', () => renderGoalStatus('strength'));
         document.getElementById('user-select-running').addEventListener('change', () => renderGoalStatus('running'));
     }
@@ -147,12 +149,20 @@
                 statusBadge.innerHTML = '<i class="fa-solid fa-wifi"></i> リアルタイム同期中';
                 updateMonthFilterOptions('strength');
                 updateMonthFilterOptions('running');
+                updateGoalMonthOptions();
                 renderApp();
+            }, (error) => {
+                console.error("Firebase Connection Error (Pushups):", error);
+                statusBadge.className = 'status-badge disconnected';
+                statusBadge.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> 接続エラー: 権限がありません';
+                alert("Firebaseのアクセス権限エラーです。\\nセキュリティルール（テストモード期間など）を確認してください。\\n詳細: " + error.message);
             });
 
             goalsRef.on('value', (snapshot) => {
                 goals = snapshot.val() || {};
                 renderApp();
+            }, (error) => {
+                console.error("Firebase Connection Error (Goals):", error);
             });
         } catch (e) {
             console.error(e);
@@ -181,14 +191,14 @@
 
     async function saveGoals() {
         if (!database) return;
-        const currentMonth = new Date().toISOString().substring(0, 7);
+        const selectedMonth = monthSelectGoal.value || new Date().toISOString().substring(0, 7);
         const selectedUser = userSelectGoal.value;
         const strength = parseInt(goalInputStrength.value) || 0;
         const running = parseFloat(goalInputRunning.value) || 0;
         if (!selectedUser) { alert('ユーザーを選択してください'); return; }
 
         try {
-            await database.ref(`goals/${currentMonth}/${selectedUser}`).set({ strength, running });
+            await database.ref(`goals/${selectedMonth}/${selectedUser}`).set({ strength, running });
             alert(`${selectedUser}さんの目標を保存しました！`);
         } catch (e) { alert('保存失敗'); }
     }
@@ -367,15 +377,15 @@
     }
 
     function renderGoalsView() {
-        const currentMonth = new Date().toISOString().substring(0, 7);
+        const selectedMonth = monthSelectGoal.value || new Date().toISOString().substring(0, 7);
         const selectedUser = userSelectGoal.value;
         if (!selectedUser) return;
 
-        const currentGoal = (goals[currentMonth] && goals[currentMonth][selectedUser]) || { strength: 0, running: 0 };
+        const currentGoal = (goals[selectedMonth] && goals[selectedMonth][selectedUser]) || { strength: 0, running: 0 };
         goalInputStrength.placeholder = `設定中: ${currentGoal.strength || 'なし'}`;
         goalInputRunning.placeholder = `設定中: ${currentGoal.running || 'なし'}`;
 
-        const ur = records.filter(r => r.date.substring(0, 7) === currentMonth && r.user === selectedUser);
+        const ur = records.filter(r => r.date.substring(0, 7) === selectedMonth && r.user === selectedUser);
         const ts = ur.filter(r => r.type === 'strength').reduce((s, r) => s + r.count, 0);
         const tr = ur.filter(r => r.type === 'running').reduce((s, r) => s + r.count, 0);
 
@@ -385,17 +395,18 @@
     function renderGoalStatus(type) {
         const container = document.getElementById(`goal-status-${type}`);
         const currentMonth = new Date().toISOString().substring(0, 7);
+        const targetMonth = (currentFilterMonth[type] && currentFilterMonth[type] !== 'all') ? currentFilterMonth[type] : currentMonth;
         
         let html = `
             <div class="goal-status-card">
-                <h4>今月の${type === 'strength' ? '筋トレ' : 'ランニング'}目標進捗（全員）</h4>
+                <h4>${targetMonth.replace('-','年')}月の${type === 'strength' ? '筋トレ' : 'ランニング'}目標進捗（全員）</h4>
                 <div class="member-goal-list">
         `;
 
         members.forEach(user => {
-            const ur = records.filter(r => r.date.substring(0, 7) === currentMonth && r.user === user && r.type === type);
+            const ur = records.filter(r => r.date.substring(0, 7) === targetMonth && r.user === user && r.type === type);
             const total = ur.reduce((s, r) => s + r.count, 0);
-            const goalVal = (goals[currentMonth] && goals[currentMonth][user] && goals[currentMonth][user][type]) || 0;
+            const goalVal = (goals[targetMonth] && goals[targetMonth][user] && goals[targetMonth][user][type]) || 0;
             const color = userColors[members.indexOf(user) % userColors.length || 0];
             
             const percent = goalVal > 0 ? Math.min(100, Math.round((total / goalVal) * 100)) : 0;
@@ -435,6 +446,24 @@
         fe.innerHTML = '<option value="all">すべての期間</option>';
         sorted.forEach(m => { fe.innerHTML += `<option value="${m}">${m.replace('-','年')}月</option>`; });
         fe.value = currentFilterMonth[type];
+    }
+
+    function updateGoalMonthOptions() {
+        if (!monthSelectGoal) return;
+        const ms = new Set();
+        records.forEach(r => ms.add(r.date.substring(0, 7)));
+        
+        const current = new Date();
+        ms.add(current.toISOString().substring(0, 7));
+        
+        const nextMonth = new Date(current.getFullYear(), current.getMonth() + 1, 1);
+        ms.add(nextMonth.toISOString().substring(0, 7));
+
+        const sorted = Array.from(ms).sort().reverse();
+        const prevValue = monthSelectGoal.value || current.toISOString().substring(0, 7);
+        
+        monthSelectGoal.innerHTML = sorted.map(m => `<option value="${m}">${m.replace('-','年')}月</option>`).join('');
+        monthSelectGoal.value = prevValue;
     }
 
     function updateUserSelectOptions() {
